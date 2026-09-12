@@ -35,6 +35,26 @@
             scroll-behavior: smooth;
         }
 
+        /* --- DESTELLOS Y BRILLOS MÁGICOS (BACKGROUND) --- */
+        .floating-sparkle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 3px var(--rose-gold), 0 0 15px 4px rgba(255,255,255,0.8);
+            opacity: 0;
+            z-index: 1; /* Detrás del texto pero sobre el fondo */
+            pointer-events: none;
+            animation: twinkle-float linear infinite;
+        }
+
+        @keyframes twinkle-float {
+            0% { opacity: 0; transform: translateY(0) scale(0.2); }
+            50% { opacity: 0.9; transform: translateY(-30px) scale(1.5); }
+            100% { opacity: 0; transform: translateY(-60px) scale(0.2); }
+        }
+
         /* --- REPRODUCTOR DE MÚSICA (STICKY) --- */
         .sticky-music-btn {
             position: fixed;
@@ -99,23 +119,20 @@
             animation: floatText 4s ease-in-out infinite;
             position: relative;
             z-index: 10;
-            background: rgba(255, 255, 255, 0.85);
-            padding: 20px 40px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,255,255,0.5);
+            /* Eliminada la caja blanca. Se agrega text-shadow para que resalte sobre la foto */
+            padding: 10px;
         }
 
         .env-tag {
             font-family: 'Cinzel', serif; font-size: 16px; letter-spacing: 8px;
-            text-transform: uppercase; color: var(--rose-gold); font-weight: 600;
+            text-transform: uppercase; color: var(--text-dark); font-weight: 600;
+            text-shadow: 0 0 15px rgba(255,255,255,1), 0 0 25px rgba(255,255,255,0.8);
         }
 
         .env-title {
             font-family: 'Pinyon Script', cursive; font-size: 85px;
             color: var(--text-dark); line-height: 1.1; margin-top: 10px;
-            text-shadow: 2px 2px 4px rgba(200, 138, 154, 0.2);
+            text-shadow: 0 0 20px rgba(255,255,255,1), 0 0 30px rgba(255,255,255,0.9), 2px 2px 4px rgba(200, 138, 154, 0.6);
         }
 
         .envelope-wrapper {
@@ -201,11 +218,11 @@
         .anim-zoom { transform: scale(0.85); }
         .anim-zoom.in-view { opacity: 1; transform: scale(1); }
 
-        .anim-sparkle.in-view { animation: sparkle 2s forwards; }
+        .anim-sparkle.in-view { animation: sparkle-text 2.5s forwards; }
 
-        @keyframes sparkle {
+        @keyframes sparkle-text {
             0% { filter: brightness(1); }
-            50% { filter: brightness(1.3) drop-shadow(0 0 10px var(--pink-deep)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 15px var(--pink-deep)); }
             100% { filter: brightness(1); }
         }
 
@@ -679,6 +696,26 @@
             isMusicPlaying = !isMusicPlaying;
         }
 
+        // --- CREADOR DE DESTELLOS MÁGICOS FLOTANTES ---
+        function createSparkles() {
+            const sparkleCount = 35; // Cantidad de brillos en pantalla
+            for (let i = 0; i < sparkleCount; i++) {
+                let sparkle = document.createElement('div');
+                sparkle.classList.add('floating-sparkle');
+                
+                // Posición aleatoria en toda la pantalla
+                sparkle.style.left = Math.random() * 100 + 'vw';
+                sparkle.style.top = Math.random() * 100 + 'vh';
+                
+                // Variación en la duración y retardo para que no parpadeen todos al mismo tiempo
+                sparkle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                sparkle.style.animationDelay = (Math.random() * 5) + 's';
+                
+                document.body.appendChild(sparkle);
+            }
+        }
+        window.addEventListener('load', createSparkles);
+
         // --- ANIMACIÓN INICIAL DEL SOBRE ---
         function openEnvelope() {
             const wrapper = document.querySelector('.envelope-wrapper');
@@ -736,12 +773,8 @@
 
         // Lógica de base de datos dummy o asignación directa por URL
         if (parametroId) {
-            // Ejemplo: Si usas base de datos mediante IDs
-            // dbInvitados = { "1": {nombre: "Familia Ejemplo", pases: 4} }
+            // Ejemplo de uso con BD
             // pasesAsignados = dbInvitados[parametroId].pases;
-            // nombreInvitado = dbInvitados[parametroId].nombre;
-            
-            // Fallback si solo envías ?id=1 sin DB llena
             pasesAsignados = 1; 
         } else if (parametroPases && !isNaN(parametroPases)) {
             pasesAsignados = parseInt(parametroPases);
@@ -754,7 +787,6 @@
                 pasesSection.style.display = 'block';
                 document.getElementById('ticket-count').innerText = pasesAsignados;
                 
-                // Opcional: prellenar nombre si viene de BD
                 if(parametroId && nombreInvitado !== "Invitado Especial"){
                     const inputName = document.getElementById("rsvp-name");
                     inputName.value = nombreInvitado;
